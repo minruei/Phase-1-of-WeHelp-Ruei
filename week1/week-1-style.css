@@ -120,7 +120,7 @@ body {
     padding: 5px;
 }
 
-.burgur span {
+.burger span {
     display: block;
     width: 25px;
     height: 3px;
@@ -190,7 +190,7 @@ body {
     }
 
     .burger {
-        display: block;
+        display: flex;
     }
 
     .navbar > ul {
