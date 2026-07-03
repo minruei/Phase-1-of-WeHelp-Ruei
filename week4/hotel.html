@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅館的資訊</title>
+    <style>
+        .header {
+            background-color: #456;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+            font-size: 20px;
+            color: #456;
+        }
+        a {
+            color: #456;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">旅館的資訊</div>
+    <div class="content">
+        {% if info %}
+            <p>{{ info.name_ch }}、{{ info.name_en }}、{{ info.phone }}</p>
+        {% else %}
+            <p>查詢不到相關資料</p>
+        {% endif %}
+        <p><a href="/">返回首頁</a></p>
+    </div>
+</body>
+</html>
