@@ -5,16 +5,16 @@ import mysql.connector
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
-
 from pydantic import BaseModel
-
-class MessageData(BaseModel):
-    content: str
 
 load_dotenv()
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="redredgreengreen")
+
+
+class MessageData(BaseModel):
+    content: str
 
 
 STYLE = """
@@ -87,9 +87,9 @@ def home():
         <div class="section">
             <h3>註冊帳號</h3>
             <form action="/signup" method="post">
-                <input type="text" name="name" placeholder="姓名">
-                <input type="email" name="email" placeholder="信箱">
-                <input type="password" name="password" placeholder="密碼">
+                <input type="text" name="name" placeholder="姓名" required>
+                <input type="email" name="email" placeholder="信箱" required>
+                <input type="password" name="password" placeholder="密碼" required>
                 <div class="btn-row">
                     <input type="submit" value="註冊">
                 </div>
@@ -99,8 +99,8 @@ def home():
         <div class="section">
             <h3>登入系統</h3>
             <form action="/login" method="post">
-                <input type="email" name="email" placeholder="信箱">
-                <input type="password" name="password" placeholder="密碼">
+                <input type="email" name="email" placeholder="信箱" required>
+                <input type="password" name="password" placeholder="密碼" required>
                 <div class="btn-row">
                     <input type="submit" value="登入">
                 </div>
