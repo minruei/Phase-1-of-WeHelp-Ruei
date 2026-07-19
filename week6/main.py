@@ -6,108 +6,23 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
 
 load_dotenv()
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="redredgreengreen")
+templates = Jinja2Templates(directory="templates")
 
 
 class MessageData(BaseModel):
     content: str
 
 
-STYLE = """
-<style>
-    body {
-        font-family: sans-serif;
-        background: #e4ece9;
-        margin: 0;
-        padding: 40px 0;
-    }
-    .card {
-        width: 340px;
-        margin: 0 auto;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    .card-header {
-        background: #0b5c4f;
-        color: white;
-        text-align: center;
-        padding: 18px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-    .section {
-        padding: 20px 24px;
-        border-bottom: 1px solid #eee;
-    }
-    .section:last-child {
-        border-bottom: none;
-    }
-    .section h3 {
-        text-align: center;
-        margin: 0 0 14px 0;
-    }
-    input[type="text"], input[type="email"], input[type="password"] {
-        width: 100%;
-        padding: 6px;
-        margin: 4px 0;
-        border: 1px solid #bbb;
-        border-radius: 3px;
-        box-sizing: border-box;
-    }
-    .btn-row {
-        text-align: center;
-        margin-top: 10px;
-    }
-    #messages p {
-        text-align: center;
-        margin: 10px 0;
-    }
-    #messages b {
-        color: #0b5c4f;
-    }
-    a {
-        color: #0b5c4f;
-    }
-</style>
-"""
-
 
 @app.get("/", response_class=HTMLResponse)
-def home():
-    return STYLE + """
-    <div class="card">
-        <div class="card-header">歡迎光臨，請註冊登入系統</div>
-
-        <div class="section">
-            <h3>註冊帳號</h3>
-            <form action="/signup" method="post">
-                <input type="text" name="name" placeholder="姓名" required>
-                <input type="email" name="email" placeholder="信箱" required>
-                <input type="password" name="password" placeholder="密碼" required>
-                <div class="btn-row">
-                    <input type="submit" value="註冊">
-                </div>
-            </form>
-        </div>
-
-        <div class="section">
-            <h3>登入系統</h3>
-            <form action="/login" method="post">
-                <input type="email" name="email" placeholder="信箱" required>
-                <input type="password" name="password" placeholder="密碼" required>
-                <div class="btn-row">
-                    <input type="submit" value="登入">
-                </div>
-            </form>
-        </div>
-    </div>
-    """
+def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.post("/signup")
@@ -154,15 +69,8 @@ def login(request: Request, email: str = Form(), password: str = Form()):
 
 
 @app.get("/ohoh", response_class=HTMLResponse)
-def error_page(msg: str):
-    return STYLE + f"""
-    <div class="card">
-        <div class="card-header">失敗頁面</div>
-        <div class="section">
-            <p style="text-align:center; color:#555;">{msg}</p>
-        </div>
-    </div>
-    """
+def error_page(request: Request, msg: str):
+    return templates.TemplateResponse("error.html", {"request": request, "msg": msg})
 
 
 @app.get("/member", response_class=HTMLResponse)
@@ -170,73 +78,7 @@ def member(request: Request):
     if "id" not in request.session:
         return RedirectResponse(url="/", status_code=303)
     name = request.session["name"]
-    return STYLE + f"""
-    <div class="card">
-        <div class="card-header">歡迎光臨，這是會員頁</div>
-
-        <div class="section" style="text-align:center;">
-            <b>{name}</b>，歡迎登入系統<br>
-            <a href="/logout">登出系統</a>
-        </div>
-
-        <div class="section">
-            <h3>快來留言吧</h3>
-            <input type="text" id="content" placeholder="內容">
-            <div class="btn-row">
-                <button onclick="createMessage()">送出</button>
-            </div>
-        </div>
-
-        <div class="section">
-            <div id="messages"></div>
-        </div>
-    </div>
-
-    <script>
-        function loadMessages() {{
-            fetch("/api/message")
-                .then(response => response.json())
-                .then(result => {{
-                    let messagesDiv = document.getElementById("messages");
-                    messagesDiv.innerHTML = "";
-                    for (let msg of result.data) {{
-                        let html = "<p><b>" + msg.name + "</b>：" + msg.content;
-                        if (msg.self) {{
-                            html += " <button onclick='deleteMessage(" + msg.id + ")'>x</button>";
-                        }}
-                        html += "</p>";
-                        messagesDiv.innerHTML += html;
-                    }}
-                }});
-        }}
-
-        function createMessage(){{
-            let content = document.getElementById("content").value;
-            fetch("/api/message", {{
-                method: "POST",
-                headers: {{ "Content-Type": "application/json" }},
-                body: JSON.stringify({{ content: content }})
-            }})
-                .then(response => response.json())
-                .then(result => {{
-                    document.getElementById("content").value = "";
-                    loadMessages();
-                }});
-        }}
-
-        function deleteMessage(id) {{
-            if (confirm("確定要刪除嗎?")) {{
-                fetch("/api/message/" + id, {{ method: "DELETE" }})
-                    .then(response => response.json())
-                    .then(result => {{
-                        loadMessages();
-                    }});
-            }}
-        }}
-
-        loadMessages();
-    </script>
-    """
+    return templates.TemplateResponse("member.html", {"request": request, "name": name})
 
 
 @app.get("/logout")
